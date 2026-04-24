@@ -1,0 +1,6 @@
+name = "DequeImpl"
+version = "0.1.0"
+defaultTargets = ["DequeImpl"]
+
+[[lean_lib]]
+name = "DequeImpl"
