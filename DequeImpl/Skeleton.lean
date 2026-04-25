@@ -9,27 +9,47 @@ structure Node (α : Type u) where
   deriving Repr
 
 structure Deque (α : Type u) where
-  head : Option NodeId
-  tail : Option NodeId
+  nodes : Array (Node α)
+  head  : Option NodeId
+  tail  : Option NodeId
+  iff_head_none : head.isNone ↔ nodes.isEmpty
+  iff_tail_none : tail.isNone ↔ nodes.isEmpty
   deriving Repr
+
 
 namespace Deque
 
 variable {α : Type u}
 
-def empty : Deque α := sorry
+def empty : Deque α := { nodes := #[], head := none, tail := none, iff_head_none := by simp, iff_tail_none := by simp }
+
+#eval (empty : Deque Int)
 
 def singleton (x : α) : Deque α := sorry
 
-def isEmpty (d : Deque α) : Bool := sorry
+-- def isEmpty (d : Deque α) : Bool := match d.nodes with
+-- | #[] => true
+-- | _ => false
 
-def size (d : Deque α) : Nat := sorry
+def isEmpty (d : Deque α) : Bool := match d.head with
+| none => true
+| _ => false
+
+def size (d : Deque α) : Nat := d.nodes.size
 
 def pushLeft (x : α) (d : Deque α) : Deque α := sorry
 
 def pushRight (x : α) (d : Deque α) : Deque α := sorry
 
-def toList (d : Deque α) : List α := sorry
+def toList (d : Deque α) : List α :=
+  let rec go (id : Option NodeId) (fuel : Nat) : List α :=
+    match fuel, id with
+    | 0, _        => []
+    | _, none     => []
+    | n+1, some i =>
+      let node := d.nodes[i]!
+      node.val :: go node.next n
+  go d.head d.nodes.size
 
 def peekLeft (d : Deque α) : Option α := sorry
 
@@ -41,12 +61,14 @@ def popRight (d : Deque α) : Option (α × Deque α) := sorry
 
 section Proofs
 
-@[simp] theorem empty_head : (empty : Deque α).head = none := by sorry
-@[simp] theorem empty_tail : (empty : Deque α).tail = none := by sorry
+@[simp] theorem empty_head : (empty : Deque α).head = none := by rfl
+@[simp] theorem empty_tail : (empty : Deque α).tail = none := by rfl
 
-@[simp] theorem empty_isEmpty : (empty : Deque α).isEmpty = true  := by sorry
-@[simp] theorem empty_size    : (empty : Deque α).size    = 0     := by sorry
-@[simp] theorem empty_toList  : (empty : Deque α).toList  = []    := by sorry
+@[simp] theorem empty_isEmpty : (empty : Deque α).isEmpty = true  := by rfl
+@[simp] theorem empty_size    : (empty : Deque α).size    = 0     := by rfl
+@[simp] theorem empty_toList : (empty : Deque α).toList = [] := by simp [toList, empty]
+
+
 
 @[simp] theorem singleton_size (x : α) : (singleton x).size = 1           := by sorry
 @[simp] theorem singleton_toList (x : α) : (singleton x).toList = [x]     := by sorry
